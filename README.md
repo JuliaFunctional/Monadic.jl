@@ -37,6 +37,38 @@ do a normal computation ``Symbol(a, b, c)`` (because it is prepended with `@pure
 and collect the last computation for all combinations (because it is the last expression)
 ```
 
+Using a wrapper as a third argument
+-----------------------------------
+
+In Addition, `@monadic` supports a little helper, namely to initially apply a given function to all containers before
+executing the standard `@monadic` semantics.
+
+```julia
+my_wrapper(i::Int) = collect(1:i)
+my_wrapper(other) = other
+my_map(f, a::Vector) = f.(a)
+my_flatmap(f, a::Vector) = vcat(f.(a)...)
+@monadic my_map my_flatmap my_wrapper begin
+  a = 2
+  b = a + 2
+  @pure (a, b)
+end
+# returns [(1,1), (1,2), (1,3), (2,1), (2,2), (2,3), (2,4)]
+```
+This is equivalent to just calling the wrapper everywhere yourself
+```julia
+@monadic my_map my_flatmap begin
+  a = my_wrapper(2)
+  b = my_wrapper(a + 2)
+  @pure (a, b)
+end
+```
+
+Together, with only three functions `my_map`, `my_flatmap` and `my_wrapper`, this gives you a compact and well-defined
+way to specify your own domain specific language.
+
+
+
 How does it do it?
 ------------------
 
@@ -137,8 +169,7 @@ end
 here you can clearly see the nestings, which usually get flattened out when using ``my_flatmap`` instead.
 
 
+Implementation Details
+----------------------
 
-Notes for the experts
----------------------
-
-This implementation intentionally uses ``map`` and ``flatmap``, and not a kind of ``pure`` and ``flatmap``. One reason is that ``map`` is already well known and defined for almost everything. A second reason is that there are many practical DataStructures for which you can define ``map`` but not ``pure`` (e.g. Dict if interpreted as Dict{Context} functor as in Scala, or the reader functor Pair{Context}.)
+This implementation intentionally uses ``map`` and ``flatmap``, and not a kind of ``pure`` and ``flatmap``. One reason is that ``map`` is already well known and defined for almost everything. A second reason is that there are practical DataStructures for which you can define ``map`` but not ``pure`` (e.g. Dict if interpreted as Dict{Context} functor as in Scala, or the writer functor Pair{Context}.)
