@@ -2,3 +2,9 @@ name = "Monadic"
 uuid = "4a6f0533-cc52-4fcf-a409-c6c05775ac80"
 authors = ["Sahm Stephan <stephan.sahm@gmx.de>"]
 version = "0.1.1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
