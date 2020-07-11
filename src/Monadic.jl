@@ -12,8 +12,8 @@ Mark code to contain non-monadic code.
 
 This can be thought of as generalized version of `pure` typeclass.
 """
-macro pure(e)
-  PureCode(e)
+macro pure(expr)
+  PureCode(expr)
 end
 
 # @pure is expanded within monadic
@@ -68,11 +68,12 @@ macro monadic(maplike, flatmaplike, wrapper, expr)
   esc(monadic(maplike, flatmaplike, wrapper, expr))
 end
 
-_ismonad(x) = x isa Expr  # this is true because @pure expressions are parsed to PureCode and LineNumberNodes should be skipped
+_ismonad(x) = !isa(x, Union{PureCode, LineNumberNode})  # all normal syntax should be treated as monadic
 
 monadic(maplike, flatmaplike, expr) = monadic(maplike, flatmaplike, :identity, expr)
 function monadic(maplike, flatmaplike, wrapper, expr)
-  @assert(expr.head == :block, "@monadic only supports plain :block expr, got instead $(expr.head)")
+  @assert(isa(expr, Expr) && expr.head == :block,
+    "@monadic only supports plain :block expr, got instead $(isa(expr, Expr) ? expr.head : typeof(expr))")
   # @pure marked lines are not Expr but PureCode, hence everything which is a normal Expr is a Monad
   i = findfirst(_ismonad, expr.args)
   if isnothing(i)
@@ -92,24 +93,24 @@ end
 function _monadic(maplike, flatmaplike, wrapper, i::Int, block::Vector{Any})
   wrap(expr) = wrapper === :identity ? expr : Expr(:call, wrapper, expr)
 
-  e::Expr = block[i]
+  expr = block[i]
   j = findnext(_ismonad, block, i+1)
   if isnothing(j) # last _monadic Expr is a special case
     # either i is the last entry at all, then this can be returned directly
     if i == length(block)
-      block[i] = wrap(e)
+      block[i] = wrap(expr)
       Expr(:block, block...)
     # or this not the last entry, but @pure expressions may follow, then we construct a final fmap
     else
       _mergepure!(i + 1, length(block), block) # merge all left @pure
       lastblock = Expr(:block, block[i+1:end]...)
 
-      callmap = if (e.head == :(=))
-        subfunc = Expr(:->, Expr(:tuple, e.args[1]), lastblock)  # we need to use :tuple wrapper to support desctructuring https://github.com/JuliaLang/julia/issues/6614
-        Expr(:call, maplike, subfunc, wrap(e.args[2]))
+      callmap = if (isa(expr, Expr) && expr.head == :(=))
+        subfunc = Expr(:->, Expr(:tuple, expr.args[1]), lastblock)  # we need to use :tuple wrapper to support desctructuring https://github.com/JuliaLang/julia/issues/6614
+        Expr(:call, maplike, subfunc, wrap(expr.args[2]))
       else
         subfunc = Expr(:->, :_, lastblock)
-        Expr(:call, maplike, subfunc, wrap(e))
+        Expr(:call, maplike, subfunc, wrap(expr))
       end
       Expr(:block, block[1:i-1]..., callmap)
     end
@@ -118,12 +119,12 @@ function _monadic(maplike, flatmaplike, wrapper, i::Int, block::Vector{Any})
     _mergepure!(i + 1, j - 1, block) # merge all new @pure inbetween
     submonadic = _monadic(maplike, flatmaplike, wrapper, j - i, block[i+1:end])
 
-    callflatmap = if (e.head == :(=))
-      subfunc = Expr(:->, Expr(:tuple, e.args[1]), submonadic)  # we need to use :tuple wrapper to support desctructuring https://github.com/JuliaLang/julia/issues/6614
-      Expr(:call, flatmaplike, subfunc, wrap(e.args[2]))
+    callflatmap = if (isa(expr, Expr) && expr.head == :(=))
+      subfunc = Expr(:->, Expr(:tuple, expr.args[1]), submonadic)  # we need to use :tuple wrapper to support desctructuring https://github.com/JuliaLang/julia/issues/6614
+      Expr(:call, flatmaplike, subfunc, wrap(expr.args[2]))
     else
       subfunc = Expr(:->, :_, submonadic)
-      Expr(:call, flatmaplike, subfunc, wrap(e))
+      Expr(:call, flatmaplike, subfunc, wrap(expr))
     end
     Expr(:block, block[1:i-1]..., callflatmap)
   end
