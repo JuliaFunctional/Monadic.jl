@@ -1,5 +1,6 @@
 module Monadic
 export @pure, @monadic, monadic
+using Compat
 
 """
 Simple helper type to mark pure code parts in monadic code block
