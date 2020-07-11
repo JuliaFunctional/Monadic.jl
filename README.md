@@ -1,6 +1,11 @@
 Monadic
 =======
 
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://schlichtanders.github.io/Monadic.jl/stable)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://schlichtanders.github.io/Monadic.jl/dev)
+[![Build Status](https://github.com/schlichtanders/Monadic.jl/workflows/CI/badge.svg)](https://github.com/schlichtanders/Monadic.jl/actions)
+[![Coverage](https://codecov.io/gh/schlichtanders/Monadic.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/schlichtanders/Monadic.jl)
+
 To load this package just run `using Monadic`. It will give you the one and only macro `@monadic` and its little helper ``@pure``.
 
 With both you can define custom monadic syntax, let's look at an example to clarifiy what this means.
@@ -28,7 +33,7 @@ a usual value or value assignment in normal syntax). With the `@pure` macro you 
 
 The context here is defined by our Vector, which we interpreted by ``my_map`` and ``my_flatmap`` as a kind of "do the computation for all combinations". It is like a context for indeterminism.
 
-So let's read the `@monadic` syntax out aload:
+So let's read the `@monadic` syntax out loud:
 ```
 for every a in [:a, :b]
 for every b in [1, 2]
@@ -40,8 +45,7 @@ and collect the last computation for all combinations (because it is the last ex
 Using a wrapper as a third argument
 -----------------------------------
 
-In Addition, `@monadic` supports a little helper, namely to initially apply a given function to all containers before
-executing the standard `@monadic` semantics.
+In addition, `@monadic` supports a little helper in order to initially apply a given function to all containers, before executing the standard `@monadic` semantics.
 
 ```julia
 my_wrapper(i::Int) = collect(1:i)
