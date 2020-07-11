@@ -18,3 +18,10 @@ iteratorresult = @monadic map myflatmap mywrapper begin
   @pure x + y
 end
 @test collect(iteratorresult)  == [2, 7, 3, 8, 4, 9]
+
+
+iteratorresult = @monadic map myflatmap begin
+  1:3
+  [1, 6]
+end
+@test collect(iteratorresult) == [1, 6, 1, 6, 1, 6]
