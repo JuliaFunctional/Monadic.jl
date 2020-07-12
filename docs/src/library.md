@@ -2,11 +2,12 @@
 CurrentModule = Monadic
 ```
 
-# Monadic.jl API
+# Public API
 
 ```@index
 ```
 
-```@autodocs
-Modules = [Monadic]
+```@docs
+@monadic
+@pure
 ```
