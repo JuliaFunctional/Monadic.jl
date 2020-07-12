@@ -1,6 +1,6 @@
 # Monadic.jl
 
-This package provides the macro `@monadic` and its little helper ``@pure``.
+This package provides the macro `@monadic` and its little helper `@pure`.
 
 With both you can define custom monadic syntax, let's look at an example to clarifiy what this means.
 
@@ -25,14 +25,14 @@ To summarize what happens is that each line is interpreted as a kind of context 
 a usual value or value assignment in normal syntax). With the `@pure` macro you can indicate that the code should be
  interpreted normally (without context).
 
-The context here is defined by our Vector, which we interpreted by ``my_map`` and ``my_flatmap`` as a kind of "do the computation for all combinations". It is like a context for indeterminism.
+The context here is defined by our Vector, which we interpreted by `my_map` and `my_flatmap` as a kind of "do the computation for all combinations". It is like a context for indeterminism.
 
 So let's read the `@monadic` syntax out loud:
 ```
 for every a in [:a, :b]
 for every b in [1, 2]
 for every c in [b + 4, b + 5]
-do a normal computation ``Symbol(a, b, c)`` (because it is prepended with `@pure`)
+do a normal computation `Symbol(a, b, c)` (because it is prepended with `@pure`)
 and collect the last computation for all combinations (because it is the last expression)
 ```
 
@@ -48,13 +48,13 @@ To load the package, use the command:
 ```julia
 using Monadic
 ```
-It will give you the macros `@monadic` and ``@pure``.
+It will give you the macros `@monadic` and `@pure`.
 
 
 ## Manual Outline
 
 ```@contents
-Pages = ["tutorial.md"]
+Pages = ["manual.md"]
 ```
 
 ## [Library Index](@id main-index)
