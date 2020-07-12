@@ -3,7 +3,9 @@ export @pure, @monadic, monadic
 using Compat
 
 """
-Simple helper type to mark pure code parts in monadic code block
+Simple helper type to mark pure code parts in monadic code block.
+
+Typically you don't use this directly, but use macro `@pure` instead.
 """
 struct PureCode
   code
