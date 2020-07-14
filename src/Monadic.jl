@@ -37,9 +37,10 @@ end
     end
     collect(iteratorresult)  # [2, 7, 3, 8, 4, 9]
 
-The ``@monadic`` allows a syntax where containers and other contexts are treated rather as values, hiding the respective
-well-defined side-effects.
-Each line without @pure is regarded as a container, each line with @pure is treated as normal code which should be inlined.
+The `@monadic` macro allows a syntax where containers and other contexts are treated rather as values, hiding the
+respective well-defined side-effects.
+Each line without @pure is regarded as a container, each line with @pure is treated as normal code which should be
+inlined.
 
 For the example above you see that the side-effect semantics of iterables are the same as for nested for loops. With the
 crucial distinction, that the @monadic syntax has a return value.
