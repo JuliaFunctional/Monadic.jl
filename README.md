@@ -43,3 +43,18 @@ and collect the last computation for all combinations (because it is the last ex
 ```
 
 For more details check out the [documentation](https://schlichtanders.github.io/Monadic.jl/dev/).
+
+## Installation
+
+To install the package, use the following command inside the Julia REPL:
+```julia
+using Pkg
+pkg"registry add https://github.com/JuliaRegistries/General"  # central julia repository
+pkg"registry add https://github.com/schlichtanders/SchlichtandersJuliaRegistry.jl"  # custom repository
+pkg"add Monadic"
+```
+To load the package, use the command:
+```julia
+using Monadic
+```
+It will give you the macros `@monadic` and `@pure`.
