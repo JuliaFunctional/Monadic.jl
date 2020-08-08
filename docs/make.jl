@@ -4,11 +4,11 @@ using Documenter
 makedocs(;
     modules=[Monadic],
     authors="Stephan Sahm and contributors",
-    repo="https://github.com/schlichtanders/Monadic.jl/blob/{commit}{path}#L{line}",
+    repo="https://github.com/JuliaFunctional/Monadic.jl/blob/{commit}{path}#L{line}",
     sitename="Monadic.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://schlichtanders.github.io/Monadic.jl",
+        canonical="https://JuliaFunctional.github.io/Monadic.jl",
         assets=String[],
     ),
     pages=[
@@ -19,5 +19,5 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/schlichtanders/Monadic.jl",
+    repo="github.com/JuliaFunctional/Monadic.jl",
 )

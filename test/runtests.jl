@@ -1,6 +1,8 @@
 using Monadic
 using Test
 
+@test isempty(detect_ambiguities(Monadic))
+
 myflatmap(f, x) = Iterators.flatten(map(f, x))
 iteratorresult = @monadic map myflatmap begin
   x = 1:3

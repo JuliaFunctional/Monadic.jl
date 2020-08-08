@@ -1,10 +1,10 @@
 Monadic
 =======
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://schlichtanders.github.io/Monadic.jl/stable)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://schlichtanders.github.io/Monadic.jl/dev)
-[![Build Status](https://github.com/schlichtanders/Monadic.jl/workflows/CI/badge.svg)](https://github.com/schlichtanders/Monadic.jl/actions)
-[![Coverage](https://codecov.io/gh/schlichtanders/Monadic.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/schlichtanders/Monadic.jl)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://JuliaFunctional.github.io/Monadic.jl/stable)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://JuliaFunctional.github.io/Monadic.jl/dev)
+[![Build Status](https://github.com/JuliaFunctional/Monadic.jl/workflows/CI/badge.svg)](https://github.com/JuliaFunctional/Monadic.jl/actions)
+[![Coverage](https://codecov.io/gh/JuliaFunctional/Monadic.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaFunctional/Monadic.jl)
 
 This package provides the macro `@monadic` and its little helper `@pure`.
 
@@ -42,15 +42,15 @@ do a normal computation `Symbol(a, b, c)` (because it is prepended with `@pure`)
 and collect the last computation for all combinations (because it is the last expression)
 ```
 
-For more details check out the [documentation](https://schlichtanders.github.io/Monadic.jl/dev/).
+For more details check out the [documentation](https://JuliaFunctional.github.io/Monadic.jl/dev/).
 
 ## Installation
 
 To install the package, use the following command inside the Julia REPL:
 ```julia
 using Pkg
-pkg"registry add https://github.com/JuliaRegistries/General"  # central julia repository
-pkg"registry add https://github.com/schlichtanders/SchlichtandersJuliaRegistry.jl"  # custom repository
+pkg"registry add https://github.com/JuliaRegistries/General"  # central julia registry
+pkg"registry add https://github.com/schlichtanders/SchlichtandersJuliaRegistry.jl"  # custom registry
 pkg"add Monadic"
 ```
 To load the package, use the command:
