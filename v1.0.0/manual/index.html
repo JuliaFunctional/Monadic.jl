@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Manual · Monadic.jl</title><link rel="canonical" href="https://JuliaFunctional.github.io/Monadic.jl/manual/"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">Monadic.jl</span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li class="is-active"><a class="tocitem" href>Manual</a><ul class="internal"><li><a class="tocitem" href="#Using-a-wrapper-as-a-third-argument"><span>Using a wrapper as a third argument</span></a></li><li><a class="tocitem" href="#How-does-it-do-it?"><span>How does it do it?</span></a></li><li><a class="tocitem" href="#The-use-of-@pure"><span>The use of <code>@pure</code></span></a></li><li><a class="tocitem" href="#The-last-value"><span>The last value</span></a></li><li><a class="tocitem" href="#Using-other-functions-instead-of-map-and-flatmap"><span>Using other functions instead of <code>map</code> and <code>flatmap</code></span></a></li><li><a class="tocitem" href="#Implementation-Details"><span>Implementation Details</span></a></li></ul></li><li><a class="tocitem" href="../library/">Library</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Manual</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Manual</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/JuliaFunctional/Monadic.jl/blob/master/docs/src/manual.md#L" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Manual"><a class="docs-heading-anchor" href="#Manual">Manual</a><a id="Manual-1"></a><a class="docs-heading-anchor-permalink" href="#Manual" title="Permalink"></a></h1><p>To load this package just run <code>using Monadic</code>. It will give you the one and only macro <code>@monadic</code> and its little helper <code>@pure</code>.</p><p>With both you can define custom monadic syntax, let&#39;s look at an example to clarifiy what this means.</p><pre><code class="language-julia">my_map(f, a::Vector) = f.(a)
+my_flatmap(f, a::Vector) = vcat(f.(a)...)
+# to show you what flatmap does, a small example
+my_flatmap(x -&gt; [x, x], [1, 2])  # [1, 1, 2, 2]  i.e. it applies `f` to every element and concatenates all results
+
+using Monadic
+@monadic my_map my_flatmap begin
+  a = [:a,:b]
+  b = [1, 2]
+  c = [b + 4, b + 5]
+  @pure Symbol(a, b, c)
+end
+
+# output
+
+8-element Array{Symbol,1}:
+ :a15
+ :a16
+ :a26
+ :a27
+ :b15
+ :b16
+ :b26
+ :b27</code></pre><p>Apparently, this use of <code>@monadic</code> works like a nested for-loop, collecting the results.</p><p>To summarize what happens is that each line is interpreted as a kind of context or context-assignment (instead of a usual value or value assignment in normal syntax). With the <code>@pure</code> macro you can indicate that the code should be  interpreted normally (without context).</p><p>The context here is defined by our Vector, which we interpreted by <code>my_map</code> and <code>my_flatmap</code> as a kind of &quot;do the computation for all combinations&quot;. It is like a context for indeterminism.</p><p>So let&#39;s read the <code>@monadic</code> syntax out loud:</p><pre><code class="language-none">for every a in [:a, :b]
+for every b in [1, 2]
+for every c in [b + 4, b + 5]
+do a normal computation `Symbol(a, b, c)` (because it is prepended with `@pure`)
+and collect the last computation for all combinations (because it is the last expression)</code></pre><h2 id="Using-a-wrapper-as-a-third-argument"><a class="docs-heading-anchor" href="#Using-a-wrapper-as-a-third-argument">Using a wrapper as a third argument</a><a id="Using-a-wrapper-as-a-third-argument-1"></a><a class="docs-heading-anchor-permalink" href="#Using-a-wrapper-as-a-third-argument" title="Permalink"></a></h2><p>In addition, <code>@monadic</code> supports a little helper in order to initially apply a given function to all containers, before executing the standard <code>@monadic</code> semantics.</p><pre><code class="language-julia">my_wrapper(i::Int) = collect(1:i)
+my_wrapper(other) = other
+
+@monadic my_map my_flatmap my_wrapper begin
+  a = 2
+  b = a + 2
+  @pure (a, b)
+end
+
+# output
+
+7-element Array{Tuple{Int64,Int64},1}:
+ (1, 1)
+ (1, 2)
+ (1, 3)
+ (2, 1)
+ (2, 2)
+ (2, 3)
+ (2, 4)</code></pre><p>This is equivalent to just calling the wrapper everywhere yourself</p><pre><code class="language-julia">@monadic my_map my_flatmap begin
+  a = my_wrapper(2)
+  b = my_wrapper(a + 2)
+  @pure (a, b)
+end</code></pre><p>Together, with only three functions <code>my_map</code>, <code>my_flatmap</code> and <code>my_wrapper</code>, this gives you a compact and well-defined way to specify your own domain specific language.</p><h2 id="How-does-it-do-it?"><a class="docs-heading-anchor" href="#How-does-it-do-it?">How does it do it?</a><a id="How-does-it-do-it?-1"></a><a class="docs-heading-anchor-permalink" href="#How-does-it-do-it?" title="Permalink"></a></h2><p>Let&#39;s inspect it with <code>@macroexpand</code></p><pre><code class="language-julia">@macroexpand @monadic my_map my_flatmap begin
+  a = [:a,:b]
+  b = [1, 2]
+  c = [b + 4, b + 5]
+  @pure Symbol(a, b, c)
+end</code></pre><p>which shows that it is translated to the following code</p><pre><code class="language-julia">(my_flatmap)(((a,)-&gt;begin
+   (my_flatmap)(((b,)-&gt;begin
+       (my_map)(((c,)-&gt;begin
+           #= none:9 =#
+           Symbol(a, b, c)
+       end), [b + 4, b + 5])
+   end), [1, 2])
+end), [:a, :b])</code></pre><p>You see, it is just a nested call of <code>my_flatmap</code> and <code>my_map</code>. More concretely, for all but the last <code>=</code> sign <code>my_flatmap</code> is used and finally <code>my_map</code>.</p><p>You can easily check that this corresponds to a nested for-loop, which collects all results flat in one final array.</p><h2 id="The-use-of-@pure"><a class="docs-heading-anchor" href="#The-use-of-@pure">The use of <code>@pure</code></a><a id="The-use-of-@pure-1"></a><a class="docs-heading-anchor-permalink" href="#The-use-of-@pure" title="Permalink"></a></h2><p>Some more example will help to better understand how the syntax works in detail. <code>@pure</code> can be placed at any row and will just bring you back to normal semantics.</p><pre><code class="language-julia">@monadic my_map my_flatmap begin
+  a = [1, 3]
+  @pure b = a + 6
+  c = [b, b, b]
+  @pure c
+end
+
+# output
+
+6-element Array{Int64,1}:
+ 7
+ 7
+ 7
+ 9
+ 9
+ 9</code></pre><p>Inspecting the macro with <code>@macroexpand</code> again shows that the <code>@pure</code> statement is now inlined into the respective <code>my_flatmap</code> (in the first example it was kind of inlined into the last call of <code>my_map</code>).</p><pre><code class="language-julia">(my_flatmap)(((a,)-&gt;begin
+   b = a + 6
+   (my_map)(((c,)-&gt;begin
+       c
+   end), [b, b, b])
+end), [1, 3])</code></pre><h2 id="The-last-value"><a class="docs-heading-anchor" href="#The-last-value">The last value</a><a id="The-last-value-1"></a><a class="docs-heading-anchor-permalink" href="#The-last-value" title="Permalink"></a></h2><p>The very last statement in a monadic code block has a special meaning as we already saw in the introductory example. For our Vector example, the last expression was the one which got collected. It my look like you always have to use <code>@pure</code> in the last row. You don&#39;t have to actually.</p><p>In fact, the last example can be simplified to the following</p><pre><code class="language-julia">@monadic my_map my_flatmap begin
+  a = [1, 3]
+  @pure b = a + 6
+  [b, b, b]
+end
+
+# output
+
+6-element Array{Int64,1}:
+ 7
+ 7
+ 7
+ 9
+ 9
+ 9</code></pre><p>Let&#39;s again look what this translates to</p><pre><code class="language-julia">(my_flatmap)(((a,)-&gt;begin
+    b = a + 6
+    [b, b, b]
+end), [1, 3])</code></pre><p>You see the code is much simpler than before, the last use of <code>my_map</code> is completely dropped and what we previously called <code>c</code> is now directly returned. You can understand the last <code>@pure</code> respectively as &quot;execute this on the final context&quot;, hence the need for <code>my_map</code>.</p><h2 id="Using-other-functions-instead-of-map-and-flatmap"><a class="docs-heading-anchor" href="#Using-other-functions-instead-of-map-and-flatmap">Using other functions instead of <code>map</code> and <code>flatmap</code></a><a id="Using-other-functions-instead-of-map-and-flatmap-1"></a><a class="docs-heading-anchor-permalink" href="#Using-other-functions-instead-of-map-and-flatmap" title="Permalink"></a></h2><p>You can define your own versions of <code>my_map</code> and <code>my_flatmap</code>, creating whatever context you would like. You can even use the syntax in a different way by not sticking to the semantics of <code>map</code> and <code>flatmap</code> for your functions.</p><p>A simple example would be to use <code>my_map</code> twice</p><pre><code class="language-julia">@monadic my_map my_map begin
+  a = [:a,:b]
+  b = [1, 2]
+  c = [b + 4, b + 5]
+  @pure Symbol(a, b, c)
+end
+
+# output
+
+2-element Array{Array{Array{Symbol,1},1},1}:
+ [[:a15, :a16], [:a26, :a27]]
+ [[:b15, :b16], [:b26, :b27]]</code></pre><p>here you can clearly see the nestings, which usually get flattened out when using <code>my_flatmap</code> instead.</p><h2 id="Implementation-Details"><a class="docs-heading-anchor" href="#Implementation-Details">Implementation Details</a><a id="Implementation-Details-1"></a><a class="docs-heading-anchor-permalink" href="#Implementation-Details" title="Permalink"></a></h2><p>This implementation intentionally uses <code>map</code> and <code>flatmap</code>, and not a kind of <code>pure</code> and <code>flatmap</code>. One reason is that <code>map</code> is already well known and defined for almost everything. A second reason is that there are practical DataStructures for which you can define <code>map</code> but not <code>pure</code> (e.g. Dict if interpreted as Dict{Context} functor as in Scala, or the writer functor Pair{Context}.)</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../library/">Library »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Thursday 13 August 2020 00:35">Thursday 13 August 2020</span>. Using Julia version 1.5.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
