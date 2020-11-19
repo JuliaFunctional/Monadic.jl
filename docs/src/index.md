@@ -42,8 +42,6 @@ and collect the last computation for all combinations (because it is the last ex
 To install the package, use the following command inside the Julia REPL:
 ```julia
 using Pkg
-pkg"registry add https://github.com/JuliaRegistries/General"  # central julia registry
-pkg"registry add https://github.com/schlichtanders/SchlichtandersJuliaRegistry.jl"  # custom registry
 pkg"add Monadic"
 ```
 To load the package, use the command:
